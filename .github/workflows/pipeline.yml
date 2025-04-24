@@ -42,7 +42,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: terraform-plan
     environment:
-      name: prod-approval
+      name: approval
       url: https://portal.azure.com/
     env:
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
