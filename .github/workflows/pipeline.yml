@@ -25,12 +25,7 @@ jobs:
         terraform_version: ${{ env.TF_VERSION }}
 
     - name: Terraform Init
-      run: |
-        terraform init \
-          -backend-config="storage_account_name=yourstorageaccount" \
-          -backend-config="container_name=yourcontainer" \
-          -backend-config="key=your-key.tfstate" \
-          -backend-config="resource_group_name=your-rg"
+      run: terraform init
 
   terraform-plan:
     name: Terraform Plan
