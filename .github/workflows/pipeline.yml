@@ -16,44 +16,16 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: ${{ env.TF_VERSION }}
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-    - name: Terraform Init
-      run: |
-        terraform init
-        if [ $? -ne 0 ]; then
-          echo "Terraform init failed"
-          exit 1
-        fi
-
-    - name: List Terraform files
-      run: ls -la .terraform .terraform.lock.hcl terraform.tfstate || echo "Files not found"
-
-    - name: Upload .terraform and lock file
-      uses: actions/upload-artifact@v4
-      with:
-        name: terraform-init-data
-        path: |
-          .terraform/
-          .terraform.lock.hcl
-          terraform.tfstate*
-        if-no-files-found: warn
-
-    - name: Verify artifact upload
-      run: |
-        echo "Checking if artifact was uploaded..."
-        if [ -f .terraform.lock.hcl ] || [ -d .terraform ]; then
-          echo "Files exist, artifact should have been uploaded."
-        else
-          echo "No files found to upload. This might cause issues in the next job."
-          exit 1
-        fi
+      - name: Terraform Init
+        run: terraform init
 
   terraform-plan:
     name: Terraform Plan
@@ -65,42 +37,22 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Download init artifacts
-      uses: actions/download-artifact@v4
-      with:
-        name: terraform-init-data
-        path: .
-      continue-on-error: false # Ensure the step fails if the artifact is not found
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-    - name: List downloaded artifacts
-      run: ls -la .terraform .terraform.lock.hcl terraform.tfstate || echo "Files not found"
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
 
-    - name: Verify downloaded artifacts
-      run: |
-        if [ -d .terraform ] || [ -f .terraform.lock.hcl ]; then
-          echo "Artifacts downloaded successfully."
-        else
-          echo "Error: No artifacts (.terraform or .terraform.lock.hcl) were downloaded. Check the terraform-init job."
-          exit 1
-        fi
-
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: ${{ env.TF_VERSION }}
-
-    - name: Terraform Plan
-      run: terraform plan -out=tfplan
-
-    - name: Upload Plan File
-      uses: actions/upload-artifact@v4
-      with:
-        name: tfplan
-        path: tfplan
-        if-no-files-found: error
+      - name: Upload Plan File
+        uses: actions/upload-artifact@v4
+        with:
+          name: tfplan
+          path: tfplan
 
   terraform-apply:
     name: Terraform Apply
@@ -115,22 +67,19 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Download Plan File
-      uses: actions/download-artifact@v4
-      with:
-        name: tfplan
-        path: .
+      - name: Download Plan File
+        uses: actions/download-artifact@v4
+        with:
+          name: tfplan
+          path: .
 
-    - name: List downloaded plan file
-      run: ls -la tfplan || echo "Plan file not found"
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: ${{ env.TF_VERSION }}
-
-    - name: Terraform Apply
-      run: terraform apply -auto-approve tfplan
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
