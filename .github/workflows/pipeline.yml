@@ -27,6 +27,15 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
+    - name: Upload .terraform and tfstate
+      uses: actions/upload-artifact@v4
+      with:
+        name: terraform-init-data
+        path: |
+          .terraform
+          .terraform.lock.hcl
+          terraform.tfstate
+
   terraform-plan:
     name: Terraform Plan
     runs-on: ubuntu-latest
@@ -39,6 +48,11 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    - name: Download init artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: terraform-init-data
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
@@ -67,6 +81,9 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
     steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Download Plan File
       uses: actions/download-artifact@v4
       with:
