@@ -7,17 +7,9 @@ env:
   TF_VERSION: '1.6.6'
 
 jobs:
-  terraform:
-    name: Terraform CI/CD
+  terraform-init:
+    name: Terraform Init
     runs-on: ubuntu-latest
-    environment:
-      name: prod-approval
-      url: https://portal.azure.com/
-    env:
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
     steps:
     - name: Checkout code
@@ -36,18 +28,46 @@ jobs:
           -backend-config="key=your-key.tfstate" \
           -backend-config="resource_group_name=your-rg"
 
+  terraform-plan:
+    name: Terraform Plan
+    runs-on: ubuntu-latest
+    needs: terraform-init
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
+
     - name: Terraform Plan
       run: terraform plan -out=tfplan
 
-    - name: ✋ Manual approval before apply
-      uses: trstringer/manual-approval@v1
+    - name: Upload Plan File
+      uses: actions/upload-artifact@v4
       with:
-        secret: ${{ github.TOKEN }}
-        approvers: ${{ github.actor }}
-        minimum-approvals: 1
-        issue-title: "Approve Terraform Apply?"
-        issue-body: "Do you approve running `terraform apply` on `main`?"
-        exclude-workflow-initiator-as-approver: false
+        name: tfplan
+        path: tfplan
+
+  terraform-apply:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    needs: terraform-plan
+    environment:
+      name: prod-approval
+      url: https://portal.azure.com/
+    steps:
+    - name: Download Plan File
+      uses: actions/download-artifact@v4
+      with:
+        name: tfplan
+
+    - name: Set up Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: ${{ env.TF_VERSION }}
 
     - name: Terraform Apply
       run: terraform apply -auto-approve tfplan
