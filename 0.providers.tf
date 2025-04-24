@@ -12,3 +12,9 @@ terraform {
     key                  = "terraform.tfstate"
   }
 }
+
+provider "azurerm" {
+  features {}
+  subscription_id = "174655ab-4346-4b1d-90fb-2dfdeb60e5e8"
+  tenant_id       = "5a6b2fb4-b7e6-4d8c-9d10-7301abf0dbcb"
+}
