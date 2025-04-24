@@ -68,5 +68,5 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Terraform Apply (manual approval required)
+      - name: Terraform Apply 
         run: terraform apply tfplan
