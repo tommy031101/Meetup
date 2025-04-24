@@ -61,3 +61,10 @@ resource "azurerm_policy_set_definition" "azurerm_policy_set_definition" {
 VALUE
   }
 }
+
+resource "azurerm_policy_assignment" "restrict_location_sub" {
+  name                 = "only-allow-westeurope-assignment"
+  display_name         = "Restrict Location to US"
+  policy_definition_id = azurerm_policy_definition.policy.id
+  scope                = "/subscriptions/174655ab-4346-4b1d-90fb-2dfdeb60e5e8"
+}
