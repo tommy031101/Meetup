@@ -43,7 +43,17 @@ jobs:
           .terraform/
           .terraform.lock.hcl
           terraform.tfstate*
-        if-no-files-found: warn # Use warn to avoid failing on missing tfstate
+        if-no-files-found: warn
+
+    - name: Verify artifact upload
+      run: |
+        echo "Checking if artifact was uploaded..."
+        if [ -f .terraform.lock.hcl ] || [ -d .terraform ]; then
+          echo "Files exist, artifact should have been uploaded."
+        else
+          echo "No files found to upload. This might cause issues in the next job."
+          exit 1
+        fi
 
   terraform-plan:
     name: Terraform Plan
@@ -63,9 +73,19 @@ jobs:
       with:
         name: terraform-init-data
         path: .
+      continue-on-error: false # Ensure the step fails if the artifact is not found
 
     - name: List downloaded artifacts
       run: ls -la .terraform .terraform.lock.hcl terraform.tfstate || echo "Files not found"
+
+    - name: Verify downloaded artifacts
+      run: |
+        if [ -d .terraform ] || [ -f .terraform.lock.hcl ]; then
+          echo "Artifacts downloaded successfully."
+        else
+          echo "Error: No artifacts (.terraform or .terraform.lock.hcl) were downloaded. Check the terraform-init job."
+          exit 1
+        fi
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
