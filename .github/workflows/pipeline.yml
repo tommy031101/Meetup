@@ -25,21 +25,25 @@ jobs:
         terraform_version: ${{ env.TF_VERSION }}
 
     - name: Terraform Init
-      run: terraform init
+      run: |
+        terraform init
+        if [ $? -ne 0 ]; then
+          echo "Terraform init failed"
+          exit 1
+        fi
 
-    # Add a step to list files for debugging
     - name: List Terraform files
       run: ls -la .terraform .terraform.lock.hcl terraform.tfstate || echo "Files not found"
 
-    - name: Upload .terraform and tfstate
+    - name: Upload .terraform and lock file
       uses: actions/upload-artifact@v4
       with:
         name: terraform-init-data
         path: |
           .terraform/
           .terraform.lock.hcl
-          terraform.tfstate
-        if-no-files-found: error # Fail the step if no files are found
+          terraform.tfstate*
+        if-no-files-found: warn # Use warn to avoid failing on missing tfstate
 
   terraform-plan:
     name: Terraform Plan
@@ -60,6 +64,9 @@ jobs:
         name: terraform-init-data
         path: .
 
+    - name: List downloaded artifacts
+      run: ls -la .terraform .terraform.lock.hcl terraform.tfstate || echo "Files not found"
+
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
       with:
@@ -73,6 +80,7 @@ jobs:
       with:
         name: tfplan
         path: tfplan
+        if-no-files-found: error
 
   terraform-apply:
     name: Terraform Apply
@@ -95,6 +103,9 @@ jobs:
       with:
         name: tfplan
         path: .
+
+    - name: List downloaded plan file
+      run: ls -la tfplan || echo "Plan file not found"
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
