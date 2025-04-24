@@ -3,7 +3,6 @@ resource "azurerm_policy_definition" "policy" {
   policy_type         = "Custom"
   mode                = "All"
   display_name        = "onlydeployineastus"
-  management_group_id = "5a6b2fb4-b7e6-4d8c-9d10-7301abf0dbcb"
 
   metadata = <<METADATA
 {
