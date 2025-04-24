@@ -1,9 +1,10 @@
+# Policy Definition: Restrict to East US Locations
 resource "azurerm_policy_definition" "policy" {
   name                = "onlydeployineastus"
   policy_type         = "Custom"
   mode                = "All"
   display_name        = "onlydeployineastus"
-  management_group_id = var.tenant_id
+  management_group_id = "/providers/Microsoft.Management/managementGroups/5a6b2fb4-b7e6-4d8c-9d10-7301abf0dbcb"
 
   metadata = <<METADATA
 {
@@ -45,20 +46,29 @@ POLICY_RULE
 PARAMETERS
 }
 
-resource "azurerm_policy_set_definition" "azurerm_policy_set_definition" {
-  name         = "katestPolicySet"
-  policy_type  = "Custom"
-  display_name = "Test Policy Set"
+# # Policy Definition: Restrict to West Europe
+# resource "azurerm_policy_definition" "custom_restrict_location" {
+#   name         = "only-allow-westeurope"
+#   policy_type  = "Custom"
+#   mode         = "All"
+#   display_name = "Allow only West Europe location"
 
-  policy_definition_reference {
-    policy_definition_id = azurerm_policy_definition.policy.id
+#   policy_rule = <<POLICY
+# {
+#   "if": {
+#     "field": "location",
+#     "notEquals": "westeurope"
+#   },
+#   "then": {
+#     "effect": "deny"
+#   }
+# }
+# POLICY
+# }
 
-    parameter_values = <<VALUE
-{
-  "allowedLocations": {
-    "value": ["eastus2", "westus2"]
-  }
-}
-VALUE
-  }
+resource "azurerm_policy_assignment" "restrict_location_sub" {
+  name                 = "only-allow-westeurope-assignment"
+  display_name         = "Restrict Location to US"
+  policy_definition_id = azurerm_policy_definition.policy.id
+  scope                = "/subscriptions/174655ab-4346-4b1d-90fb-2dfdeb60e5e8"
 }
