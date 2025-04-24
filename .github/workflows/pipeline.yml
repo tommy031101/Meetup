@@ -53,6 +53,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: terraform-init-data
+        path: .
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
@@ -88,6 +89,7 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: tfplan
+        path: .
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v2
