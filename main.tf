@@ -81,7 +81,7 @@ resource "azurerm_policy_definition" "restrict_location" {
 resource "azurerm_subscription_policy_assignment" "restrict_location_assignment" {
   name                 = "restrict-location-assignment"
   policy_definition_id = azurerm_policy_definition.restrict_location.id
-  subscription_id      = data.azurerm_client_config.current.subscription_id
+  subscription_id      = "/subscriptions/174655ab-4346-4b1d-90fb-2dfdeb60e5e8"
 }
 
 output "key_vault_uri" {
