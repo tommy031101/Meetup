@@ -12,11 +12,15 @@ resource "azurerm_virtual_network" "demo_vnet" {
   resource_group_name = azurerm_resource_group.demo_rg.name
 }
 
+# Create a subnet with a service endpoint for Microsoft.KeyVault
 resource "azurerm_subnet" "demo_subnet" {
   name                 = "meetup-demo-subnet"
   resource_group_name  = azurerm_resource_group.demo_rg.name
   virtual_network_name = azurerm_virtual_network.demo_vnet.name
   address_prefixes     = ["10.0.1.0/24"]
+
+  # Add the service endpoint for Key Vault
+  service_endpoints = ["Microsoft.KeyVault"]
 }
 
 # Create the Azure Key Vault with network rules
