@@ -51,10 +51,10 @@ resource "azurerm_key_vault_access_policy" "app_access_policy" {
   object_id    = "abdc857a-423e-4dda-a694-75a793f0ac56" # Object ID from the error
 
   secret_permissions = [
-    "get",
-    "list",
-    "set",
-    "delete"
+    "Get",
+    "List",
+    "Set",
+    "Delete"
   ]
 }
 
