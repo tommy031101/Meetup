@@ -62,28 +62,6 @@ resource "azurerm_key_vault_access_policy" "app_access_policy" {
   ]
 }
 
-# First secret
-resource "azurerm_key_vault_secret" "demo_secret" {
-  name         = "demo-secret"
-  value        = "SuperSecretValue123!"
-  key_vault_id = azurerm_key_vault.demo_vault.id
-
-  tags = {
-    purpose = "meetup-demo"
-  }
-}
-
-# Second secret for demo purposes
-resource "azurerm_key_vault_secret" "demo_secret_2" {
-  name         = "demo-secret-2"
-  value        = "AnotherSecretValue456!"
-  key_vault_id = azurerm_key_vault.demo_vault.id
-
-  tags = {
-    purpose = "meetup-demo"
-  }
-}
-
 # Create a Log Analytics workspace for monitoring
 resource "azurerm_log_analytics_workspace" "demo_law" {
   name                = "meetup-demo-law"
